@@ -4,7 +4,258 @@ author: "Raghu Bindinganavale"
 date: "13 March 2016"
 output: html_document
 ---
-This is a sample document, including some of the defaut RMD content to illustrate display of the page on a `gh-pages` website until we post the actual content related to the Practical Machine Learning course project. 
+I went about the analysis as shown below.
+
+1. First step was to prepare the datasets
+  a. Read the training data into a data table.
+  b. Read the testing data into a data table.
+  c. I used Belt, arm, dubbell and forearm variables as predictor candidates      as they do not have any missing values in the test dataset and got the      following output
+##  [1] "roll_belt"          "pitch_belt"       "yaw_belt"              
+##  [4] "total_accel_belt"   "gyros_belt_x"       "gyros_belt_y"          
+##  [7] "gyros_belt_z"       "accel_belt_x"         "accel_belt_y"         ## [10] "accel_belt_z"       "magnet_belt_x"        "magnet_belt_y"        ## [13] "magnet_belt_z"      "roll_arm"             "pitch_arm"            ## [16] "yaw_arm"            "total_accel_arm"      "gyros_arm_x"          ## [19] "gyros_arm_y"        "gyros_arm_z"          "accel_arm_x"          ## [22] "accel_arm_y"        "accel_arm_z"          "magnet_arm_x"         ## [25] "magnet_arm_y"       "magnet_arm_z"         "roll_dumbbell"        ## [28] "pitch_dumbbell"     "yaw_dumbbell"        "total_accel_dumbbell"
+## [31] "gyros_dumbbell_x"     "gyros_dumbbell_y"     "gyros_dumbbell_z"   
+## [34] "accel_dumbbell_x"     "accel_dumbbell_y"     "accel_dumbbell_z"  
+## [37] "magnet_dumbbell_x"    "magnet_dumbbell_y"    "magnet_dumbbell_z" 
+## [40] "roll_forearm"         "pitch_forearm"        "yaw_forearm"       
+## [43] "total_accel_forearm"  "gyros_forearm_x"      "gyros_forearm_y"   
+## [46] "gyros_forearm_z"      "accel_forearm_x"      "accel_forearm_y"   
+## [49] "accel_forearm_z"      "magnet_forearm_x"     "magnet_forearm_y"  
+## [52] "magnet_forearm_z"
+  d. I then subset the primary dataset to include only predictor candidates      and the outcome variable, classe. Got the following output
+## [1] 19622    53
+     Got the names as
+##  [1] "classe"               "roll_belt"            "pitch_belt"         
+##  [4] "yaw_belt"             "total_accel_belt"     "gyros_belt_x"       
+##  [7] "gyros_belt_y"         "gyros_belt_z"         "accel_belt_x"       
+## [10] "accel_belt_y"         "accel_belt_z"         "magnet_belt_x"      
+## [13] "magnet_belt_y"        "magnet_belt_z"        "roll_arm"           
+## [16] "pitch_arm"            "yaw_arm"              "total_accel_arm"    
+## [19] "gyros_arm_x"          "gyros_arm_y"          "gyros_arm_z"        
+## [22] "accel_arm_x"          "accel_arm_y"          "accel_arm_z"        
+## [25] "magnet_arm_x"         "magnet_arm_y"         "magnet_arm_z"       
+## [28] "roll_dumbbell"        "pitch_dumbbell"       "yaw_dumbbell"       
+## [31] "total_accel_dumbbell" "gyros_dumbbell_x"     "gyros_dumbbell_y"   
+## [34] "gyros_dumbbell_z"     "accel_dumbbell_x"     "accel_dumbbell_y"   
+## [37] "accel_dumbbell_z"     "magnet_dumbbell_x"    "magnet_dumbbell_y"  
+## [40] "magnet_dumbbell_z"    "roll_forearm"         "pitch_forearm"      
+## [43] "yaw_forearm"          "total_accel_forearm"  "gyros_forearm_x"    
+## [46] "gyros_forearm_y"      "gyros_forearm_z"      "accel_forearm_x"    
+## [49] "accel_forearm_y"      "accel_forearm_z"      "magnet_forearm_x"   
+## [52] "magnet_forearm_y"     "magnet_forearm_z"
+  e. I then made classe into a  factor, output as below
+##    classe    N
+## 1:      A 5580
+## 2:      B 3797
+## 3:      C 3422
+## 4:      D 3216
+## 5:      E 3607  
+  f. I split the dataset into a 60% training and 40% probing dataset using caret.
+  g. I preprocessed the prediction variables by centering and scaling,           output as below
+## Created from 11776 samples and 52 variables
+## Pre-processing:
+## - centered (52)
+## - ignored (0)
+## - scaled (52)
+  h. I applied the centering and scaling to the probing dataset.
+  i. I then checked for near zero variance and got the following output
+## No variables with near zero variance
+  
+2. Second was to train a prediction model
+
+I used random forest to estimate this. 40% of probing sample will be used to estimate the error. If the error estimate is 3% or less then it will be good.
+
+  a. First step was to setup the parallel clusters, output as below
+## Loading required package: parallel
+## Loading required package: doParallel
+## Loading required package: foreach
+## foreach: simple, scalable parallel programming from Revolution Analytics
+## Use Revolution R for scalability, fault tolerance and more.
+## http://www.revolutionanalytics.com
+## Loading required package: iterators
+## Warning messages:
+## 1: package ‘doParallel’ was built under R version 3.2.4 
+## 2: package ‘foreach’ was built under R version 3.2.4 
+  b. Next step was to set the control parameters
+  c. Next was to fit the model over the tuning parameters, output shown below
+##   user  system elapsed 
+##  36.65    0.31  879.49 
+
+3.   Third was to evaluate the model on the training dataset, output shown below
+## Random Forest 
+##
+## 11776 samples
+##   52 predictor
+##    5 classes: 'A', 'B', 'C', 'D', 'E' 
+##
+## No pre-processing
+## Resampling: Bootstrapped (25 reps) 
+## Summary of sample sizes: 11776, 11776, 11776, 11776, 11776, 11776, ... 
+## Resampling results across tuning parameters:
+##
+##  mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+##   2    0.9859998  0.9822871  0.002050927  0.002594375
+##  27    0.9863780  0.9827684  0.002640139  0.003333446
+##  52    0.9761224  0.9697978  0.006544888  0.008260494
+##
+## Accuracy was used to select the optimal model using  the largest value.
+## The final value used for the model was mtry = 27. 
+##
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 3348    0    0    0    0
+##          B    0 2279    0    0    0
+##          C    0    0 2054    0    0
+##          D    0    0    0 1930    0
+##          E    0    0    0    0 2165
+## 
+## Overall Statistics
+##                                      
+##                Accuracy : 1          
+##                  95% CI : (0.9997, 1)
+##     No Information Rate : 0.2843     
+##     P-Value [Acc > NIR] : < 2.2e-16  
+##                                      
+##                   Kappa : 1          
+##  Mcnemar's Test P-Value : NA         
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            1.0000   1.0000   1.0000   1.0000   1.0000
+## Specificity            1.0000   1.0000   1.0000   1.0000   1.0000
+## Pos Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+## Prevalence             0.2843   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2843   0.1935   0.1744   0.1639   0.1838
+## Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+## Balanced Accuracy      1.0000   1.0000   1.0000   1.0000   1.0000
+
+4. Next step was to evaluate the model on the probing dataset, output as below
+## Confusion Matrix and Statistics
+##
+##          Reference
+## Prediction    A    B    C    D    E
+##         A 2225   14    0    0    0
+##         B    4 1498   13    0    4
+##         C    0    5 1352   13    3
+##         D    1    1    3 1267    2
+##         E    2    0    0    6 1433
+##
+## Overall Statistics
+##                                          
+##               Accuracy : 0.991           
+##                 95% CI : (0.9886, 0.9929)
+##    No Information Rate : 0.2845          
+##    P-Value [Acc > NIR] : < 2.2e-16       
+##                                          
+##                  Kappa : 0.9886          
+## Mcnemar's Test P-Value : NA              
+##
+## Statistics by Class:
+##
+##                     Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9969   0.9868   0.9883   0.9852   0.9938
+## Specificity            0.9975   0.9967   0.9968   0.9989   0.9988
+## Pos Pred Value         0.9937   0.9862   0.9847   0.9945   0.9944
+## Neg Pred Value         0.9988   0.9968   0.9975   0.9971   0.9986
+## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2836   0.1909   0.1723   0.1615   0.1826
+## Detection Prevalence   0.2854   0.1936   0.1750   0.1624   0.1837
+## Balanced Accuracy      0.9972   0.9918   0.9925   0.9921   0.9963
+
+5. Next step is to display the final model, output below
+## rf variable importance
+##
+##  only 20 most important variables shown (out of 52)
+##
+##                     Overall
+## roll_belt             100.00
+## pitch_forearm          59.63
+## yaw_belt               53.92
+## roll_forearm           44.89
+## magnet_dumbbell_y      43.98
+## magnet_dumbbell_z      43.57
+## pitch_belt             43.51
+## accel_dumbbell_y       22.26
+## accel_forearm_x        16.96
+## roll_dumbbell          16.86
+## magnet_dumbbell_x      16.13
+## magnet_belt_z          15.09
+## magnet_forearm_z       13.29
+## total_accel_dumbbell   12.99
+## magnet_belt_y          12.73
+## accel_dumbbell_z       12.53
+## accel_belt_z           12.29
+## magnet_belt_x          11.26
+## yaw_arm                11.01
+## gyros_belt_z           10.23
+##
+## Call:
+##  randomForest(x = x, y = y, mtry = param$mtry) 
+##               Type of random forest: classification
+##                     Number of trees: 500
+## No. of variables tried at each split: 27
+##
+##        OOB estimate of  error rate: 0.89%
+## Confusion matrix:
+##     A    B    C    D    E class.error
+## A 3342    2    4    0    0 0.001792115
+## B   22 2252    5    0    0 0.011847301
+## C    0   15 2029   10    0 0.012171373
+## D    1    1   30 1896    2 0.017616580
+## E    1    1    4    7 2152 0.006004619
+
+The estimated error rate is less than 1%
+6. Next was to predict on the test data
+   a. First step is to load the training model
+## Loading objects:
+##   trainingModel
+   b. Get the predictions and evaluate, output as below
+##     hat V1 user_name raw_timestamp_part_1 raw_timestamp_part_2
+##  1:   B  1     pedro           1323095002               868349
+##  2:   A  2    jeremy           1322673067               778725
+##  3:   B  3    jeremy           1322673075               342967
+##  4:   A  4    adelmo           1322832789               560311
+##  5:   A  5    eurico           1322489635               814776
+##  6:   E  6    jeremy           1322673149               510661
+##  7:   D  7    jeremy           1322673128               766645
+##  8:   B  8    jeremy           1322673076                54671
+##  9:   A  9  carlitos           1323084240               916313
+## 10:   A 10   charles           1322837822               384285
+## 11:   B 11  carlitos           1323084277                36553
+## 12:   C 12    jeremy           1322673101               442731
+## 13:   B 13    eurico           1322489661               298656
+## 14:   A 14    jeremy           1322673043               178652
+## 15:   E 15    jeremy           1322673156               550750
+## 16:   E 16    eurico           1322489713               706637
+## 17:   A 17     pedro           1323094971               920315
+## 18:   B 18  carlitos           1323084285               176314
+## 19:   B 19     pedro           1323094999               828379
+## 20:   B 20    eurico           1322489658               106658
+##       cvtd_timestamp new_window num_window problem_id
+##  1: 05/12/2011 14:23         no         74          1
+##  2: 30/11/2011 17:11         no        431          2
+##  3: 30/11/2011 17:11         no        439          3
+##  4: 02/12/2011 13:33         no        194          4
+##  5: 28/11/2011 14:13         no        235          5
+##  6: 30/11/2011 17:12         no        504          6
+##  7: 30/11/2011 17:12         no        485          7
+##  8: 30/11/2011 17:11         no        440          8
+##  9: 05/12/2011 11:24         no        323          9
+## 10: 02/12/2011 14:57         no        664         10
+## 11: 05/12/2011 11:24         no        859         11
+## 12: 30/11/2011 17:11         no        461         12
+## 13: 28/11/2011 14:14         no        257         13
+## 14: 30/11/2011 17:10         no        408         14
+## 15: 30/11/2011 17:12         no        779         15
+## 16: 28/11/2011 14:15         no        302         16
+## 17: 05/12/2011 14:22         no         48         17
+## 18: 05/12/2011 11:24         no        361         18
+## 19: 05/12/2011 14:23         no         72         19
+## 20: 28/11/2011 14:14         no        255         20
+   
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -15,16 +266,5 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
-```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
